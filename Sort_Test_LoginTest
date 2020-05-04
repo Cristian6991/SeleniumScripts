@@ -1,0 +1,100 @@
+package com.company;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.util.Collections;
+import java.util.LinkedList;
+
+public class JavaScript_Test {
+    WebDriver driver;
+    String ChromePath = System.getProperty("user.dir") + "\\drivers\\chromedriver.exe";
+    String eResult = null;
+    String aResult = null;
+    String baseUrl = "http://live.demoguru99.com/index.php/";
+    @BeforeTest
+    public void LaunchBrowser() {
+        System.setProperty("webdriver.chrome.driver", ChromePath);
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+    }
+    @Test (priority = 1)//Ejercicio 1- Exercise 1
+    public void Sorted_by_Name() {
+        try {//arranque - Start
+            driver.get(baseUrl);
+            eResult = "Home page";
+            aResult = driver.getTitle();
+            Assert.assertEquals(eResult, aResult);
+            WebElement mobile = driver.findElement(By.xpath("//*[@id=\"nav\"]/ol/li[1]/a"));
+            mobile.click();
+            eResult = "Mobile";
+            aResult = driver.getTitle();
+            Assert.assertEquals(eResult, aResult);
+            
+            //se encuentra la dropdown list - Find the dropdown List
+            WebElement select_by = driver.findElement(By.cssSelector("body > div > div > div.main-container.col3-layout > div > div.col-wrapper > div.col-main > div.category-products > div.toolbar > div.sorter > div > select"));
+            select_by.click();
+            
+            //Se selecciona el ordenamiento a verificar - Select the kind of sort
+            new Select(select_by).selectByVisibleText("Name");
+            
+            //Se encuentra los elemntos que componen la lista a verificar - Find the element that make up  the list to verify
+            
+            WebElement element1 = driver.findElement(By.xpath("//*[@id=\"top\"]/body/div/div/div[2]/div/div[2]/div[1]/div[3]/ul/li[1]/div/h2/a"));
+            WebElement element2 = driver.findElement(By.xpath("//*[@id=\"top\"]/body/div/div/div[2]/div/div[2]/div[1]/div[3]/ul/li[2]/div/h2/a"));
+            WebElement element3 = driver.findElement(By.xpath("//*[@id=\"top\"]/body/div/div/div[2]/div/div[2]/div[1]/div[3]/ul/li[3]/div/h2/a"));
+           //Se crea la lista con los elementos - proceed to make a list of the elements that we find
+            
+            LinkedList<String> productos = new LinkedList<String>();
+            productos.add(element1.getText());
+            productos.add(element2.getText());
+            productos.add(element3.getText());
+            
+            //Se ordena - it sorts
+            
+            Collections.sort(productos);
+            
+            //Se compara - this Compare the list sorted vs the original sort of the element that where finded
+            
+            Assert.assertEquals(element1.getText(), productos.get(0));
+            Assert.assertEquals(element2.getText(), productos.get(1));
+            Assert.assertEquals(element3.getText(), productos.get(2));
+        }
+        catch (Exception e)
+        {TearDown();
+        Assert.fail();}
+        finally { }
+
+    }
+    //Ejercicio 2 - Exercise 2
+    @Test(dataProvider = "login", priority = 2)
+    public void SingIn(String id, String pass)
+    {driver.get("http://www.demo.guru99.com/V4/");
+    WebElement username = driver.findElement(By.name("uid"));
+    username.sendKeys(id);
+    WebElement PassWord = driver.findElement(By.name("password"));
+    PassWord.sendKeys(pass);
+    WebElement loginBtn = driver.findElement(By.name("btnLogin"));
+    loginBtn.click();
+    eResult = "Guru99 Bank Manager HomePage";
+    aResult = driver.getTitle();
+    Assert.assertEquals(aResult, eResult);
+    }
+
+    @AfterTest
+    public void TearDown() {
+        driver.quit();
+    }
+    @DataProvider (name = "login")
+    public Object[][] GetDataFromDataProvider()
+    {return new Object[][] {{"mngr259368", "gAzAmen"}};
+    }
+}
